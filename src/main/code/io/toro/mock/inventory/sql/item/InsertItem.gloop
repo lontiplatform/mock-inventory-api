@@ -1,0 +1,54 @@
+{
+    "type": "customSql",
+    "comments": "Inserts an inventory item record to the `mock_inventory_api` database",
+    "input": [
+        {
+            "name": "insertItemInput",
+            "type": "model",
+            "gloopProperties": [
+                {
+                    "name": "$martiniConnectionPool"
+                },
+                {
+                    "name": "$getGeneratedKeys",
+                    "type": "boolean",
+                    "defaultValue": false
+                },
+                {
+                    "name": "id"
+                },
+                {
+                    "name": "sku"
+                },
+                {
+                    "name": "itemName"
+                },
+                {
+                    "name": "customFields"
+                },
+                {
+                    "name": "quantityOnHand",
+                    "type": "integer"
+                },
+                {
+                    "name": "quantityAvailable",
+                    "type": "integer"
+                }
+            ]
+        }
+    ],
+    "output": [
+        {
+            "name": "updateCount",
+            "type": "integer"
+        },
+        {
+            "name": "generatedKeys",
+            "type": "model",
+            "allowExtraProperties": true
+        }
+    ],
+    "connectionPoolName": "mock_inventory_api",
+    "sqlType": "INSERT",
+    "query": "INSERT INTO \"ITEMS\" (\n\t\"ID\",\n\t\"SKU\",\n\t\"ITEM_NAME\",\n\t\"CUSTOM_FIELDS\",\n\t\"QUANTITY_ON_HAND\",\n\t\"QUANTITY_AVAILABLE\" ) \nVALUES (\n\t:id,\n\t:sku,\n\t:itemName,\n\t:customFields,\n\t:quantityOnHand,\n\t:quantityAvailable\n)"
+}

@@ -1,0 +1,197 @@
+{
+    "info": {
+        "title": "Mock Inventory API",
+        "contact": {
+            "name": "TORO Cloud",
+            "url": "https://support.torocloud.com"
+        },
+        "license": {
+            "name": "MIT"
+        },
+        "version": "1.0.0"
+    },
+    "basePath": "/mock-inventory-api",
+    "paths": {
+        "/items": {
+            "description": "Inventory item endpoint for creating or getting all the inventory items",
+            "get": {
+                "tags": [
+                    "Item"
+                ],
+                "summary": "Lists all inventory items",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "body": "item",
+                        "description": "A list of inventory items will be returned by by this endpoint if the request is successful"
+                    },
+                    "500": {
+                        "body": "APIResponse"
+                    }
+                },
+                "operationType": "gloop",
+                "operationLocation": "io.toro.mock.inventory.api.controller.item.ListItem",
+                "responseCodeField": "responseCode"
+            },
+            "post": {
+                "tags": [
+                    "Item"
+                ],
+                "summary": "Creates an inventory item",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "bodyParameter": {
+                    "name": "item",
+                    "description": "item"
+                },
+                "responses": {
+                    "-1": {
+                        "body": "APIResponse",
+                        "description": "Depending on the request response, It will either return a success or error result, with a short summary of the success or error  message\n\n* 201 if the inventory item is created.\n* 400 if there's an SQLIntegrityConstraintViolationException. This means that there must be a duplicate entry for the entry you are trying to create\n* 500 if the request encountered a server error"
+                    }
+                },
+                "operationType": "gloop",
+                "operationLocation": "io.toro.mock.inventory.api.controller.item.CreateItem",
+                "responseCodeField": "responseCode"
+            }
+        },
+        "/items/{itemId}": {
+            "description": "Inventory item endpoint for getting a single, updating, and deleting a single record",
+            "get": {
+                "tags": [
+                    "Item"
+                ],
+                "summary": "Retrieves a single record",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "itemId",
+                        "type": "PATH"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "body": "item",
+                        "description": "Returns details about the requested inventory item record"
+                    },
+                    "404": {
+                        "body": "APIResponse",
+                        "description": "If the record could not be found"
+                    },
+                    "500": {
+                        "body": "APIResponse",
+                        "description": "If the service encountered an exception while executing the request"
+                    }
+                },
+                "operationType": "gloop",
+                "operationLocation": "io.toro.mock.inventory.api.controller.item.GetItem",
+                "responseCodeField": "responseCode"
+            },
+            "delete": {
+                "tags": [
+                    "Item"
+                ],
+                "summary": "Deletes a single inventory item.",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "itemId",
+                        "type": "PATH",
+                        "description": "The record id of the inventory item to be deleted"
+                    }
+                ],
+                "responses": {
+                    "-1": {
+                        "body": "APIResponse",
+                        "description": "* 204 if the inventory item is successfully deleted.\n* 404 If the requested item to update could not be found.\n* 500 if the request encountered a server error."
+                    }
+                },
+                "operationType": "gloop",
+                "operationLocation": "io.toro.mock.inventory.api.controller.item.DeleteItem",
+                "responseCodeField": "responseCode"
+            },
+            "patch": {
+                "tags": [
+                    "Item"
+                ],
+                "summary": "Updates an inventory item record",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "itemId",
+                        "type": "PATH",
+                        "description": "The record id of the record to be updated"
+                    }
+                ],
+                "bodyParameter": {
+                    "name": "item",
+                    "description": "item"
+                },
+                "responses": {
+                    "-1": {
+                        "body": "APIResponse",
+                        "description": "Details about the result of the request\n\n* 201 if the inventory item is created.\n* 400 if there's an SQLIntegrityConstraintViolationException. This means that there must be a duplicate entry for the entry you are trying to create.\n* 404 If the requested item to update could not be found.\n* 500 if the request encountered a server error."
+                    }
+                },
+                "operationType": "gloop",
+                "operationLocation": "io.toro.mock.inventory.api.controller.item.UpdateItem",
+                "responseCodeField": "responseCode"
+            }
+        },
+        "/items/{itemId}/{type}": {
+            "patch": {
+                "tags": [
+                    "Item"
+                ],
+                "summary": "Updates the stock level of an inventory item",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "itemId",
+                        "type": "PATH"
+                    },
+                    {
+                        "name": "type",
+                        "type": "PATH"
+                    }
+                ],
+                "bodyParameter": {
+                    "name": "item",
+                    "description": "item"
+                },
+                "responses": {
+                    "-1": {
+                        "body": "APIResponse",
+                        "description": "Depending on the request response, It will either return a success or error result, with a short summary of the success or error  message\n\n* 200 if the inventory item is successfully updated.\n* 400 if the values provided are invalid, e.g. negative number for `quantity`\n* 500 if the request encountered a server error"
+                    }
+                },
+                "operationType": "gloop",
+                "operationLocation": "io.toro.mock.inventory.api.controller.item.UpdateItemQuantity",
+                "responseCodeField": "responseCode"
+            }
+        }
+    },
+    "externalDocumentation": {
+        "url": "http://example.com"
+    }
+}

@@ -1,0 +1,44 @@
+{
+    "type": "customSql",
+    "comments": "### UpdateItem SQL query\n\nUpdates an inventory item record in the database. The database columns will update its value if the parameters provided is not null.",
+    "input": [
+        {
+            "name": "updateItemInput",
+            "type": "model",
+            "gloopProperties": [
+                {
+                    "name": "$martiniConnectionPool"
+                },
+                {
+                    "name": "itemName"
+                },
+                {
+                    "name": "sku"
+                },
+                {
+                    "name": "customFields"
+                },
+                {
+                    "name": "quantityOnHand",
+                    "type": "integer"
+                },
+                {
+                    "name": "quantityAvailable",
+                    "type": "integer"
+                },
+                {
+                    "name": "itemId"
+                }
+            ]
+        }
+    ],
+    "output": [
+        {
+            "name": "updateCount",
+            "type": "integer"
+        }
+    ],
+    "connectionPoolName": "mock_inventory_api",
+    "sqlType": "UPDATE",
+    "query": "UPDATE \"ITEMS\"\n\tSET \"ITEM_NAME\"= COALESCE( :itemName, \"ITEM_NAME\" ),\n\t\t\"SKU\" = COALESCE( :sku, \"SKU\" ),\n\t\t\"CUSTOM_FIELDS\" = COALESCE( :customFields, \"CUSTOM_FIELDS\" ),\n\t\t\"QUANTITY_ON_HAND\" = COALESCE( :quantityOnHand, \"QUANTITY_ON_HAND\" ),\n\t\t\"QUANTITY_AVAILABLE\" = COALESCE( :quantityAvailable, \"QUANTITY_AVAILABLE\" ),\n\t\t\"DATE_UPDATED\" = CURRENT_TIMESTAMP\nWHERE (\"ID\" = :itemId)"
+}

@@ -1,0 +1,294 @@
+{
+    "comments": "### Create Item\n\nThis service will create an inventory item for the mock Inventory API.",
+    "input": [
+        {
+            "name": "item",
+            "type": "model",
+            "comments": "The inventory item model",
+            "gloopProperties": [
+                {
+                    "name": "itemName",
+                    "comments": "The name of the inventory item to be created"
+                },
+                {
+                    "name": "sku",
+                    "comments": "The unique identifier of an inventory item"
+                },
+                {
+                    "name": "quantityOnHand",
+                    "type": "integer",
+                    "comments": "Total quantity of the inventory item"
+                },
+                {
+                    "name": "quantityAvailable",
+                    "type": "integer",
+                    "comments": "Total quantity of available inventory item"
+                },
+                {
+                    "name": "customField",
+                    "type": "model",
+                    "comments": "Additional properties go here.",
+                    "allowExtraProperties": true
+                }
+            ]
+        }
+    ],
+    "output": [
+        {
+            "name": "APIResponse",
+            "type": "model",
+            "comments": "API response",
+            "reference": "io.toro.mock.inventory.model.APIResponse"
+        },
+        {
+            "name": "responseCode",
+            "type": "integer",
+            "defaultValue": 200
+        }
+    ],
+    "steps": [
+        {
+            "type": "block",
+            "blockType": "TRY_CATCH",
+            "children": [
+                {
+                    "comments": "Generates a random UUID that will serve as the record id of the inventory item to be created.",
+                    "declare": [
+                        {
+                            "variables": [
+                                {
+                                    "name": "id"
+                                }
+                            ]
+                        }
+                    ],
+                    "lines": [
+                        {
+                            "type": "set",
+                            "expression": "UUID.randomUUID()",
+                            "evaluate": true,
+                            "to": [
+                                "id"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "invokeGloop",
+                    "comments": "Executes an insert query for the inventory item to be created, and saves it on the database",
+                    "name": "io.toro.mock.inventory.sql.item.InsertItem",
+                    "inputs": [
+                        {
+                            "from": [
+                                "item",
+                                "itemName"
+                            ],
+                            "to": [
+                                "insertItemInput",
+                                "itemName"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "item",
+                                "quantityOnHand"
+                            ],
+                            "to": [
+                                "insertItemInput",
+                                "quantityOnHand"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "item",
+                                "quantityAvailable"
+                            ],
+                            "to": [
+                                "insertItemInput",
+                                "quantityAvailable"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "item",
+                                "sku"
+                            ],
+                            "to": [
+                                "insertItemInput",
+                                "sku"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "id"
+                            ],
+                            "to": [
+                                "insertItemInput",
+                                "id"
+                            ]
+                        },
+                        {
+                            "type": "set",
+                            "expression": "item.customField?.isNullValue()? \"{}\": item.customField.asJson(false, false)",
+                            "evaluate": true,
+                            "to": [
+                                "insertItemInput",
+                                "customFields"
+                            ]
+                        }
+                    ],
+                    "outputs": [
+                        {
+                            "type": "set",
+                            "expression": "SUCCESS",
+                            "to": [
+                                "APIResponse",
+                                "result"
+                            ]
+                        },
+                        {
+                            "type": "set",
+                            "expression": "201",
+                            "to": [
+                                "responseCode"
+                            ]
+                        },
+                        {
+                            "type": "set",
+                            "expression": "\"Successfully created item with id: ${id}.\"",
+                            "evaluate": true,
+                            "to": [
+                                "APIResponse",
+                                "message"
+                            ],
+                            "priority": 1
+                        }
+                    ]
+                }
+            ],
+            "catch": [
+                {
+                    "type": "fork",
+                    "comments": "Check if the exception caught is an SQL Exception",
+                    "expression": "$gloopException.message.contains( 'java.sql.SQLIntegrityConstraintViolationException' )",
+                    "children": [
+                        {
+                            "type": "invokeCode",
+                            "label": "true",
+                            "comments": "If the exception caught is an SQLIntegrityConstraintViolationException, set the appropriate response code (400)",
+                            "className": "io.toro.martini.LoggerMethods",
+                            "methodName": "error",
+                            "parameters": [
+                                "java.lang.String",
+                                "java.lang.Throwable"
+                            ],
+                            "inputs": [
+                                {
+                                    "from": [
+                                        "$gloopException",
+                                        "realException"
+                                    ],
+                                    "to": [
+                                        "throwable"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "$gloopException",
+                                        "gloopStackTrace"
+                                    ],
+                                    "to": [
+                                        "message"
+                                    ]
+                                }
+                            ],
+                            "outputs": [
+                                {
+                                    "type": "set",
+                                    "expression": "ERROR",
+                                    "to": [
+                                        "APIResponse",
+                                        "result"
+                                    ]
+                                },
+                                {
+                                    "type": "set",
+                                    "expression": "$gloopException.message",
+                                    "evaluate": true,
+                                    "to": [
+                                        "APIResponse",
+                                        "message"
+                                    ]
+                                },
+                                {
+                                    "type": "set",
+                                    "expression": "400",
+                                    "to": [
+                                        "responseCode"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "invokeCode",
+                            "label": "false",
+                            "comments": "If it's not an SQLIntegretyConstraintViolationException, set the approriate response code (500)",
+                            "className": "io.toro.martini.LoggerMethods",
+                            "methodName": "error",
+                            "parameters": [
+                                "java.lang.String",
+                                "java.lang.Throwable"
+                            ],
+                            "inputs": [
+                                {
+                                    "from": [
+                                        "$gloopException",
+                                        "realException"
+                                    ],
+                                    "to": [
+                                        "throwable"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "$gloopException",
+                                        "gloopStackTrace"
+                                    ],
+                                    "to": [
+                                        "message"
+                                    ]
+                                }
+                            ],
+                            "outputs": [
+                                {
+                                    "type": "set",
+                                    "expression": "ERROR",
+                                    "to": [
+                                        "APIResponse",
+                                        "result"
+                                    ]
+                                },
+                                {
+                                    "type": "set",
+                                    "expression": "$gloopException.message",
+                                    "evaluate": true,
+                                    "to": [
+                                        "APIResponse",
+                                        "message"
+                                    ]
+                                },
+                                {
+                                    "type": "set",
+                                    "expression": "500",
+                                    "to": [
+                                        "responseCode"
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

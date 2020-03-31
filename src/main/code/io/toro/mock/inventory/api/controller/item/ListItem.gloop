@@ -1,0 +1,284 @@
+{
+    "comments": "### List Item\n\nThis service will list all the items in mock Inventory API",
+    "output": [
+        {
+            "name": "item",
+            "type": "model",
+            "array": true,
+            "comments": "List of inventory items",
+            "reference": "io.toro.mock.inventory.model.item.Item",
+            "gloopProperties": [
+                {
+                    "name": "id"
+                }
+            ]
+        },
+        {
+            "name": "APIResponse",
+            "type": "model",
+            "comments": "API response that contains the error message",
+            "reference": "io.toro.mock.inventory.model.APIResponse"
+        },
+        {
+            "name": "responseCode",
+            "type": "integer",
+            "defaultValue": 200,
+            "comments": "The HTTP request response code for the request"
+        }
+    ],
+    "steps": [
+        {
+            "type": "block",
+            "blockType": "TRY_CATCH",
+            "children": [
+                {
+                    "type": "invokeGloop",
+                    "name": "io.toro.mock.inventory.sql.item.SelectAllItems",
+                    "declare": [
+                        {
+                            "variables": [
+                                {
+                                    "name": "selectAllItemsOutputCursor",
+                                    "type": "model",
+                                    "array": true,
+                                    "gloopProperties": [
+                                        {
+                                            "name": "ID",
+                                            "required": true,
+                                            "allowNull": false
+                                        },
+                                        {
+                                            "name": "SKU",
+                                            "required": true
+                                        },
+                                        {
+                                            "name": "ITEM_NAME",
+                                            "required": true,
+                                            "allowNull": false
+                                        },
+                                        {
+                                            "name": "CUSTOM_FIELDS",
+                                            "required": true
+                                        },
+                                        {
+                                            "name": "QUANTITY_ON_HAND",
+                                            "type": "integer",
+                                            "required": true,
+                                            "allowNull": false
+                                        },
+                                        {
+                                            "name": "QUANTITY_AVAILABLE",
+                                            "type": "integer",
+                                            "required": true,
+                                            "allowNull": false
+                                        },
+                                        {
+                                            "name": "DATE_CREATED",
+                                            "type": "date",
+                                            "required": true
+                                        },
+                                        {
+                                            "name": "DATE_UPDATED",
+                                            "type": "date",
+                                            "required": true
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "outputs": [
+                        {
+                            "from": [
+                                "selectAllItemsInputCursor"
+                            ],
+                            "to": [
+                                "selectAllItemsOutputCursor"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "iterate",
+                    "comments": "Iterate over the selectAllItemsOutputCursor and add each record to the items Gloop model array",
+                    "input": {
+                        "path": [
+                            "selectAllItemsOutputCursor"
+                        ]
+                    },
+                    "output": {
+                        "path": [
+                            "item"
+                        ]
+                    },
+                    "children": [
+                        {
+                            "comments": "Map a single selectAllItemsOutputCursor record to the item Gloop model.",
+                            "lines": [
+                                {
+                                    "from": [
+                                        "selectAllItemsOutputCursor",
+                                        "ITEM_NAME"
+                                    ],
+                                    "to": [
+                                        "item",
+                                        "itemName"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "selectAllItemsOutputCursor",
+                                        "QUANTITY_ON_HAND"
+                                    ],
+                                    "to": [
+                                        "item",
+                                        "quantityOnHand"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "selectAllItemsOutputCursor",
+                                        "QUANTITY_AVAILABLE"
+                                    ],
+                                    "to": [
+                                        "item",
+                                        "quantityAvailable"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "selectAllItemsOutputCursor",
+                                        "DATE_CREATED"
+                                    ],
+                                    "to": [
+                                        "item",
+                                        "dateCreated"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "selectAllItemsOutputCursor",
+                                        "DATE_UPDATED"
+                                    ],
+                                    "to": [
+                                        "item",
+                                        "dateUpdated"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "selectAllItemsOutputCursor",
+                                        "ID"
+                                    ],
+                                    "to": [
+                                        "item",
+                                        "id"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "selectAllItemsOutputCursor",
+                                        "SKU"
+                                    ],
+                                    "to": [
+                                        "item",
+                                        "sku"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "invokeCode",
+                            "comments": "convert the JSON string from the database to a Gloop model object, and map it the the customFields property in the item Gloop model",
+                            "className": "io.toro.martini.JsonMethods",
+                            "methodName": "jsonStringToGloopObject",
+                            "parameters": [
+                                "java.lang.String"
+                            ],
+                            "inputs": [
+                                {
+                                    "from": [
+                                        "selectAllItemsOutputCursor",
+                                        "CUSTOM_FIELDS"
+                                    ],
+                                    "to": [
+                                        "jsonString"
+                                    ]
+                                }
+                            ],
+                            "outputs": [
+                                {
+                                    "from": [
+                                        "output"
+                                    ],
+                                    "to": [
+                                        "item",
+                                        "customFields"
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "catch": [
+                {
+                    "type": "invokeCode",
+                    "comments": "Log an error message in the console, and then map the appropriate error response and response code",
+                    "className": "io.toro.martini.LoggerMethods",
+                    "methodName": "error",
+                    "parameters": [
+                        "java.lang.String",
+                        "java.lang.Throwable"
+                    ],
+                    "inputs": [
+                        {
+                            "from": [
+                                "$gloopException",
+                                "realException"
+                            ],
+                            "to": [
+                                "throwable"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "$gloopException",
+                                "gloopStackTrace"
+                            ],
+                            "to": [
+                                "message"
+                            ]
+                        }
+                    ],
+                    "outputs": [
+                        {
+                            "type": "set",
+                            "expression": "ERROR",
+                            "to": [
+                                "APIResponse",
+                                "result"
+                            ]
+                        },
+                        {
+                            "type": "set",
+                            "expression": "500",
+                            "to": [
+                                "responseCode"
+                            ]
+                        },
+                        {
+                            "type": "set",
+                            "expression": "$gloopException.message",
+                            "evaluate": true,
+                            "to": [
+                                "APIResponse",
+                                "message"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

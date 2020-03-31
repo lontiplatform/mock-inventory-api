@@ -1,0 +1,301 @@
+{
+    "comments": "### Get Item\n\nThis service will retrieve item in mock Inventory API",
+    "input": [
+        {
+            "name": "itemId",
+            "comments": "The record id of an inventory item"
+        }
+    ],
+    "output": [
+        {
+            "name": "item",
+            "type": "model",
+            "comments": "Details of the item",
+            "reference": "io.toro.mock.inventory.model.item.Item",
+            "gloopProperties": [
+                {
+                    "name": "id"
+                }
+            ]
+        },
+        {
+            "name": "APIResponse",
+            "type": "model",
+            "comments": "API response",
+            "reference": "io.toro.mock.inventory.model.APIResponse"
+        },
+        {
+            "name": "responseCode",
+            "type": "integer",
+            "defaultValue": 200
+        }
+    ],
+    "steps": [
+        {
+            "type": "block",
+            "blockType": "TRY_CATCH",
+            "children": [
+                {
+                    "type": "invokeGloop",
+                    "name": "io.toro.mock.inventory.sql.item.SelectItem",
+                    "declare": [
+                        {
+                            "variables": [
+                                {
+                                    "name": "CUSTOM_FIELD",
+                                    "required": true
+                                }
+                            ]
+                        }
+                    ],
+                    "inputs": [
+                        {
+                            "from": [
+                                "itemId"
+                            ],
+                            "to": [
+                                "selectItemInput",
+                                "itemId"
+                            ]
+                        }
+                    ],
+                    "outputs": [
+                        {
+                            "from": [
+                                "selectItemOutput",
+                                "ITEM_NAME"
+                            ],
+                            "to": [
+                                "item",
+                                "itemName"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "selectItemOutput",
+                                "DATE_CREATED"
+                            ],
+                            "to": [
+                                "item",
+                                "dateCreated"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "selectItemOutput",
+                                "DATE_UPDATED"
+                            ],
+                            "to": [
+                                "item",
+                                "dateUpdated"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "selectItemOutput",
+                                "QUANTITY_ON_HAND"
+                            ],
+                            "to": [
+                                "item",
+                                "quantityOnHand"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "selectItemOutput",
+                                "QUANTITY_AVAILABLE"
+                            ],
+                            "to": [
+                                "item",
+                                "quantityAvailable"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "selectItemOutput",
+                                "SKU"
+                            ],
+                            "to": [
+                                "item",
+                                "sku"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "selectItemOutput",
+                                "ID"
+                            ],
+                            "to": [
+                                "item",
+                                "id"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "selectItemOutput",
+                                "CUSTOM_FIELDS"
+                            ],
+                            "to": [
+                                "CUSTOM_FIELD"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "fork",
+                    "comments": "Is there a record found using the id provided in the SELECT query?",
+                    "expression": "item?.id",
+                    "children": [
+                        {
+                            "type": "invokeCode",
+                            "label": "$null",
+                            "comments": "If none found, log an error message, and set the appropriate response payload and code (404)",
+                            "className": "io.toro.martini.LoggerMethods",
+                            "methodName": "error",
+                            "parameters": [
+                                "java.lang.String"
+                            ],
+                            "inputs": [
+                                {
+                                    "type": "set",
+                                    "expression": "\"No item with id \\\"${itemId}\\\" found.\"",
+                                    "evaluate": true,
+                                    "to": [
+                                        "message"
+                                    ]
+                                }
+                            ],
+                            "outputs": [
+                                {
+                                    "from": [
+                                        "output"
+                                    ],
+                                    "to": [
+                                        "APIResponse",
+                                        "message"
+                                    ]
+                                },
+                                {
+                                    "type": "set",
+                                    "expression": "ERROR",
+                                    "to": [
+                                        "APIResponse",
+                                        "result"
+                                    ]
+                                },
+                                {
+                                    "type": "set",
+                                    "expression": "404",
+                                    "to": [
+                                        "responseCode"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "invokeCode",
+                            "label": "$else",
+                            "comments": "If a record is found, convert the JSON string for the custom field into a Gloop model, and them map it to the customFields Gloop model in the item model.",
+                            "unload": [
+                                [
+                                    "CUSTOM_FIELD"
+                                ]
+                            ],
+                            "className": "io.toro.martini.JsonMethods",
+                            "methodName": "jsonStringToGloopObject",
+                            "parameters": [
+                                "java.lang.String"
+                            ],
+                            "inputs": [
+                                {
+                                    "from": [
+                                        "CUSTOM_FIELD"
+                                    ],
+                                    "to": [
+                                        "jsonString"
+                                    ]
+                                }
+                            ],
+                            "outputs": [
+                                {
+                                    "from": [
+                                        "output"
+                                    ],
+                                    "to": [
+                                        "item",
+                                        "customFields"
+                                    ]
+                                },
+                                {
+                                    "type": "set",
+                                    "expression": "200",
+                                    "to": [
+                                        "responseCode"
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "catch": [
+                {
+                    "type": "invokeCode",
+                    "comments": "Log any exception thrown by the service in the console. And then set the appropriate response and response code",
+                    "className": "io.toro.martini.LoggerMethods",
+                    "methodName": "error",
+                    "parameters": [
+                        "java.lang.String",
+                        "java.lang.Throwable"
+                    ],
+                    "inputs": [
+                        {
+                            "from": [
+                                "$gloopException",
+                                "realException"
+                            ],
+                            "to": [
+                                "throwable"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "$gloopException",
+                                "gloopStackTrace"
+                            ],
+                            "to": [
+                                "message"
+                            ]
+                        }
+                    ],
+                    "outputs": [
+                        {
+                            "type": "set",
+                            "expression": "ERROR",
+                            "to": [
+                                "APIResponse",
+                                "result"
+                            ]
+                        },
+                        {
+                            "type": "set",
+                            "expression": "$gloopException.message",
+                            "evaluate": true,
+                            "to": [
+                                "APIResponse",
+                                "message"
+                            ]
+                        },
+                        {
+                            "type": "set",
+                            "expression": "500",
+                            "to": [
+                                "responseCode"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

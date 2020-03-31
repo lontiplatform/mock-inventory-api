@@ -1,0 +1,69 @@
+{
+    "type": "customSql",
+    "comments": "### SelecAllItem SQL query\n\nExecutes a `SELECT *` query to retrieve all records from the database",
+    "input": [
+        {
+            "name": "selectAllItemsInput",
+            "type": "model",
+            "gloopProperties": [
+                {
+                    "name": "$martiniConnectionPool"
+                },
+                {
+                    "name": "$limit",
+                    "type": "integer"
+                }
+            ]
+        }
+    ],
+    "output": [
+        {
+            "name": "selectAllItemsInputCursor",
+            "type": "model",
+            "array": true,
+            "gloopProperties": [
+                {
+                    "name": "ID",
+                    "required": true,
+                    "allowNull": false
+                },
+                {
+                    "name": "SKU",
+                    "required": true
+                },
+                {
+                    "name": "ITEM_NAME",
+                    "required": true,
+                    "allowNull": false
+                },
+                {
+                    "name": "CUSTOM_FIELDS",
+                    "required": true
+                },
+                {
+                    "name": "QUANTITY_ON_HAND",
+                    "type": "integer",
+                    "required": true
+                },
+                {
+                    "name": "QUANTITY_AVAILABLE",
+                    "type": "integer",
+                    "required": true
+                },
+                {
+                    "name": "DATE_CREATED",
+                    "type": "date",
+                    "required": true
+                },
+                {
+                    "name": "DATE_UPDATED",
+                    "type": "date",
+                    "required": true
+                }
+            ]
+        }
+    ],
+    "connectionPoolName": "mock_inventory_api",
+    "sqlType": "SELECT_MULTI",
+    "query": "SELECT * FROM \"ITEMS\""
+}

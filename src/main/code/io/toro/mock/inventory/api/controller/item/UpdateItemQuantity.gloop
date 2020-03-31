@@ -1,0 +1,420 @@
+{
+    "comments": "### Update Item Quantity\n\nThis service will update the quantity of the item in mock Inventory API",
+    "input": [
+        {
+            "name": "itemId",
+            "comments": "The record id of the inventory item to be updated"
+        },
+        {
+            "name": "type",
+            "allowNull": false,
+            "comments": "quantity type to adjust ( Quantity On-Hand or Quantity Available )",
+            "choices": [
+                "quantity-on-hand",
+                "quantity-available"
+            ]
+        },
+        {
+            "name": "item",
+            "type": "model",
+            "gloopProperties": [
+                {
+                    "name": "quantity",
+                    "type": "integer",
+                    "required": true,
+                    "comments": "The quantity to increase/decrease (i.e. 15)"
+                },
+                {
+                    "name": "action",
+                    "required": true,
+                    "comments": "action (increase or decrease)",
+                    "choices": [
+                        "increase",
+                        "decrease"
+                    ]
+                }
+            ]
+        }
+    ],
+    "output": [
+        {
+            "name": "APIResponse",
+            "type": "model",
+            "comments": "API response",
+            "reference": "io.toro.mock.inventory.model.APIResponse"
+        },
+        {
+            "name": "responseCode",
+            "type": "integer",
+            "defaultValue": 200
+        }
+    ],
+    "steps": [
+        {
+            "type": "block",
+            "blockType": "TRY_CATCH",
+            "children": [
+                {
+                    "type": "invokeGloop",
+                    "name": "io.toro.mock.inventory.api.controller.item.GetItem",
+                    "declare": [
+                        {
+                            "variables": [
+                                {
+                                    "name": "getItemResponse",
+                                    "type": "model",
+                                    "gloopProperties": [
+                                        {
+                                            "name": "result",
+                                            "choices": [
+                                                "SUCCESS",
+                                                "ERROR"
+                                            ]
+                                        },
+                                        {
+                                            "name": "message"
+                                        },
+                                        {
+                                            "name": "responseCode",
+                                            "type": "integer",
+                                            "defaultValue": 200
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "jsonBody",
+                                    "type": "model",
+                                    "allowExtraProperties": true,
+                                    "gloopProperties": [
+                                        {
+                                            "name": "item",
+                                            "type": "model",
+                                            "reference": "io.toro.mock.inventory.model.item.Item",
+                                            "gloopProperties": [
+                                                {
+                                                    "name": "id"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "inputs": [
+                        {
+                            "from": [
+                                "itemId"
+                            ],
+                            "to": [
+                                "itemId"
+                            ]
+                        }
+                    ],
+                    "outputs": [
+                        {
+                            "from": [
+                                "APIResponse",
+                                "result"
+                            ],
+                            "to": [
+                                "getItemResponse",
+                                "result"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "APIResponse",
+                                "message"
+                            ],
+                            "to": [
+                                "getItemResponse",
+                                "message"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "responseCode"
+                            ],
+                            "to": [
+                                "getItemResponse",
+                                "responseCode"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "fork",
+                    "comments": "Check if the retrieval of the inventory item to be updated is successful",
+                    "expression": "getItemResponse.responseCode",
+                    "children": [
+                        {
+                            "type": "block",
+                            "label": "200",
+                            "comments": "If the response code is 200",
+                            "children": [
+                                {
+                                    "comments": "apply changes in quantity",
+                                    "lines": [
+                                        {
+                                            "type": "set",
+                                            "expression": "type.equals(\"quantity-on-hand\")? \n\tjsonBody.item.quantityOnHand + (item.action == 'increase' ? item.quantity : (- item.quantity) ) : \n\tjsonBody.item.quantityOnHand\n",
+                                            "evaluate": true,
+                                            "to": [
+                                                "jsonBody",
+                                                "item",
+                                                "quantityOnHand"
+                                            ]
+                                        },
+                                        {
+                                            "type": "set",
+                                            "expression": "type.equals(\"quantity-available\")? \n\tjsonBody.item.quantityAvailable + (item.action == 'increase' ? item.quantity : (- item.quantity) ) : \n\tjsonBody.item.quantityAvailable",
+                                            "evaluate": true,
+                                            "to": [
+                                                "jsonBody",
+                                                "item",
+                                                "quantityAvailable"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "fork",
+                                    "expression": "jsonBody.item.quantityOnHand > -1 && jsonBody.item.quantityAvailable > -1 && jsonBody.item.quantityOnHand >= jsonBody.item.quantityAvailable",
+                                    "children": [
+                                        {
+                                            "type": "block",
+                                            "label": "true",
+                                            "children": [
+                                                {
+                                                    "type": "invokeGloop",
+                                                    "name": "io.toro.mock.inventory.sql.item.UpdateItem",
+                                                    "inputs": [
+                                                        {
+                                                            "from": [
+                                                                "itemId"
+                                                            ],
+                                                            "to": [
+                                                                "updateItemInput",
+                                                                "itemId"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "from": [
+                                                                "jsonBody",
+                                                                "item",
+                                                                "itemName"
+                                                            ],
+                                                            "to": [
+                                                                "updateItemInput",
+                                                                "itemName"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "from": [
+                                                                "jsonBody",
+                                                                "item",
+                                                                "quantityOnHand"
+                                                            ],
+                                                            "to": [
+                                                                "updateItemInput",
+                                                                "quantityOnHand"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "from": [
+                                                                "jsonBody",
+                                                                "item",
+                                                                "quantityAvailable"
+                                                            ],
+                                                            "to": [
+                                                                "updateItemInput",
+                                                                "quantityAvailable"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "set",
+                                                            "expression": "jsonBody.item.customFields?.isNullValue()? \"{}\": jsonBody.item.customFields.asJson(false, false)",
+                                                            "evaluate": true,
+                                                            "to": [
+                                                                "updateItemInput",
+                                                                "customFields"
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "outputs": [
+                                                        {
+                                                            "type": "set",
+                                                            "expression": "200",
+                                                            "to": [
+                                                                "responseCode"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "set",
+                                                            "expression": "SUCCESS",
+                                                            "to": [
+                                                                "APIResponse",
+                                                                "result"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "set",
+                                                            "expression": "\"Successfully updated ${type} of item with id: ${itemId} by ${ Math.abs(item.quantity) }.\"",
+                                                            "evaluate": true,
+                                                            "to": [
+                                                                "APIResponse",
+                                                                "message"
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "invokeCode",
+                                            "label": "false",
+                                            "className": "io.toro.martini.LoggerMethods",
+                                            "methodName": "error",
+                                            "parameters": [
+                                                "java.lang.String"
+                                            ],
+                                            "inputs": [
+                                                {
+                                                    "type": "set",
+                                                    "expression": "String quantityfield = type.equals(\"quantity-on-hand\")? \"quantityOnHand\": \"quantityAvailable\";\n\njsonBody.item.quantityOnHand < jsonBody.item.quantityAvailable? \"Quantity available can't be higher than the Quantity On Hand.\" :\n\"Can not decrease the ${type} due to insufficient quantity, current ${type}: ${jsonBody.item.\"${quantityfield}\"}\"",
+                                                    "evaluate": true,
+                                                    "to": [
+                                                        "message"
+                                                    ]
+                                                }
+                                            ],
+                                            "outputs": [
+                                                {
+                                                    "from": [
+                                                        "output"
+                                                    ],
+                                                    "to": [
+                                                        "APIResponse",
+                                                        "message"
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "set",
+                                                    "expression": "ERROR",
+                                                    "to": [
+                                                        "APIResponse",
+                                                        "result"
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "set",
+                                                    "expression": "400",
+                                                    "to": [
+                                                        "responseCode"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "label": "$else",
+                            "lines": [
+                                {
+                                    "from": [
+                                        "getItemResponse",
+                                        "result"
+                                    ],
+                                    "to": [
+                                        "APIResponse",
+                                        "result"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "getItemResponse",
+                                        "message"
+                                    ],
+                                    "to": [
+                                        "APIResponse",
+                                        "message"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "getItemResponse",
+                                        "responseCode"
+                                    ],
+                                    "to": [
+                                        "responseCode"
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "catch": [
+                {
+                    "type": "invokeCode",
+                    "comments": "Log the exception in the console, and then map the appropriate response message and code",
+                    "className": "io.toro.martini.LoggerMethods",
+                    "methodName": "error",
+                    "parameters": [
+                        "java.lang.String",
+                        "java.lang.Throwable"
+                    ],
+                    "inputs": [
+                        {
+                            "from": [
+                                "$gloopException",
+                                "realException"
+                            ],
+                            "to": [
+                                "throwable"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "$gloopException",
+                                "gloopStackTrace"
+                            ],
+                            "to": [
+                                "message"
+                            ]
+                        }
+                    ],
+                    "outputs": [
+                        {
+                            "type": "set",
+                            "expression": "ERROR",
+                            "to": [
+                                "APIResponse",
+                                "result"
+                            ]
+                        },
+                        {
+                            "type": "set",
+                            "expression": "500",
+                            "to": [
+                                "responseCode"
+                            ]
+                        },
+                        {
+                            "type": "set",
+                            "expression": "$gloopException.message",
+                            "evaluate": true,
+                            "to": [
+                                "APIResponse",
+                                "message"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

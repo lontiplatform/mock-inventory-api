@@ -1,0 +1,310 @@
+{
+    "steps": [
+        {
+            "type": "block",
+            "blockType": "TRY_CATCH",
+            "children": [
+                {
+                    "declare": [
+                        {
+                            "variables": [
+                                {
+                                    "name": "item",
+                                    "type": "model",
+                                    "array": true,
+                                    "allowExtraProperties": true,
+                                    "gloopProperties": [
+                                        {
+                                            "name": "sku"
+                                        },
+                                        {
+                                            "name": "quantityAvailable",
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "name": "quantityOnHand",
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "name": "dateCreated"
+                                        },
+                                        {
+                                            "name": "dateUpdated"
+                                        },
+                                        {
+                                            "name": "itemName"
+                                        },
+                                        {
+                                            "name": "customField",
+                                            "type": "model"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "invokeCode",
+                    "declare": [
+                        {
+                            "variables": [
+                                {
+                                    "name": "inputStream",
+                                    "type": "object",
+                                    "objectClassName": "java.io.InputStream"
+                                }
+                            ]
+                        }
+                    ],
+                    "className": "io.toro.martini.FileMethods",
+                    "methodName": "resourceStream",
+                    "parameters": [
+                        "java.lang.String",
+                        "java.lang.String",
+                        "io.toro.gloop.engine.GloopExecutionContext"
+                    ],
+                    "inputs": [
+                        {
+                            "type": "set",
+                            "expression": "resources/item_stock.csv",
+                            "to": [
+                                "resource"
+                            ]
+                        }
+                    ],
+                    "outputs": [
+                        {
+                            "from": [
+                                "output"
+                            ],
+                            "to": [
+                                "inputStream"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "invokeCode",
+                    "className": "io.toro.martini.FlatFileMethods",
+                    "methodName": "getDelimitedFileInputCursor",
+                    "parameters": [
+                        "java.io.InputStream",
+                        "java.lang.String",
+                        "char",
+                        "java.lang.Character",
+                        "java.lang.Character",
+                        "java.lang.Character",
+                        "int",
+                        "boolean",
+                        "boolean",
+                        "boolean",
+                        "java.lang.String",
+                        "java.lang.String",
+                        "io.toro.gloop.object.property.GloopModel",
+                        "java.lang.String[]",
+                        "java.lang.String",
+                        "io.toro.gloop.engine.GloopExecutionContext"
+                    ],
+                    "inputs": [
+                        {
+                            "from": [
+                                "inputStream"
+                            ],
+                            "to": [
+                                "flatFileData"
+                            ]
+                        },
+                        {
+                            "type": "set",
+                            "expression": "item.keySet()",
+                            "evaluate": true,
+                            "to": [
+                                "fieldNames"
+                            ]
+                        }
+                    ],
+                    "outputs": [
+                        {
+                            "from": [
+                                "output"
+                            ],
+                            "to": [
+                                "item"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "invokeCode",
+                    "className": "io.toro.martini.LoggerMethods",
+                    "methodName": "info",
+                    "parameters": [
+                        "java.lang.String"
+                    ],
+                    "inputs": [
+                        {
+                            "type": "set",
+                            "expression": "Inserting dummy data into items table...",
+                            "to": [
+                                "message"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "iterate",
+                    "comments": "populate items table",
+                    "input": {
+                        "path": [
+                            "item"
+                        ]
+                    },
+                    "children": [
+                        {
+                            "type": "invokeCode",
+                            "className": "io.toro.martini.LoggerMethods",
+                            "methodName": "println",
+                            "parameters": [
+                                "java.lang.String"
+                            ],
+                            "inputs": [
+                                {
+                                    "type": "set",
+                                    "expression": "item.asJson()",
+                                    "evaluate": true,
+                                    "to": [
+                                        "message"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "invokeGloop",
+                            "name": "io.toro.mock.inventory.sql.item.InsertItem",
+                            "declare": [
+                                {
+                                    "variables": [
+                                        {
+                                            "name": "generatedKeys",
+                                            "type": "model",
+                                            "allowExtraProperties": true
+                                        }
+                                    ]
+                                }
+                            ],
+                            "inputs": [
+                                {
+                                    "from": [
+                                        "item",
+                                        "sku"
+                                    ],
+                                    "to": [
+                                        "insertItemInput",
+                                        "sku"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "item",
+                                        "itemName"
+                                    ],
+                                    "to": [
+                                        "insertItemInput",
+                                        "itemName"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "item",
+                                        "quantityAvailable"
+                                    ],
+                                    "to": [
+                                        "insertItemInput",
+                                        "quantityAvailable"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "item",
+                                        "quantityOnHand"
+                                    ],
+                                    "to": [
+                                        "insertItemInput",
+                                        "quantityOnHand"
+                                    ]
+                                },
+                                {
+                                    "type": "set",
+                                    "expression": "{}",
+                                    "to": [
+                                        "insertItemInput",
+                                        "customFields"
+                                    ]
+                                },
+                                {
+                                    "type": "set",
+                                    "expression": "false",
+                                    "to": [
+                                        "insertItemInput",
+                                        "$getGeneratedKeys"
+                                    ]
+                                },
+                                {
+                                    "type": "set",
+                                    "expression": "UUID.randomUUID()",
+                                    "evaluate": true,
+                                    "to": [
+                                        "insertItemInput",
+                                        "id"
+                                    ]
+                                }
+                            ],
+                            "outputs": [
+                                {
+                                    "from": [
+                                        "generatedKeys"
+                                    ],
+                                    "to": [
+                                        "generatedKeys"
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "catch": [
+                {
+                    "type": "invokeCode",
+                    "className": "io.toro.martini.LoggerMethods",
+                    "methodName": "error",
+                    "parameters": [
+                        "java.lang.String",
+                        "java.lang.Throwable"
+                    ],
+                    "inputs": [
+                        {
+                            "from": [
+                                "$gloopException",
+                                "realException"
+                            ],
+                            "to": [
+                                "throwable"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "$gloopException",
+                                "gloopStackTrace"
+                            ],
+                            "to": [
+                                "message"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
