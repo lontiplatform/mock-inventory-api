@@ -6,7 +6,7 @@
 
     <groupId>io.toro</groupId>
     <artifactId>mock-inventory-api</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <properties>
         <rootDir>${basedir}</rootDir>
