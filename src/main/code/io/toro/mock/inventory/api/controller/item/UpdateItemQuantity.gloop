@@ -140,6 +140,15 @@
                                 "getItemResponse",
                                 "responseCode"
                             ]
+                        },
+                        {
+                            "from": [
+                                "item"
+                            ],
+                            "to": [
+                                "jsonBody",
+                                "item"
+                            ]
                         }
                     ]
                 },
