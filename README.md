@@ -51,6 +51,17 @@ mysql.password=
 
 The inventory API supports custom fields but note that you can only add and edit custom fields as of this time.
 
+### Sending Authenticated Requests
+
+You can use your ECC account to send authenticated request to the API. Your ECC credentials must be sent in the `Authorization` header in the HTTP request
+
+#### To authenticate a request with basic authentication
+
+1. Combine your email and password with a colon (`:`). e.g. `jdoe@mailinator.com:pa$$w0rd`
+2. Encode the resulting string in Base64
+3. Include an Authorization header in the HTTP request containing the base64-encoded string. Example: ```
+Authorization: Basic amRvZUBtYWlsaW5hdG9yLmNvbTpwYSQkdzByZA==```
+
 ### Operations
 
 The base url is `<host>/api/mock-inventory-api` where `host` is the location where the Martini is deployed. By default, it's `localhost:8080`.
@@ -65,6 +76,7 @@ Returns a list of inventory items
 ```
 curl -X GET \
   http://localhost:8080/api/mock-inventory-api/items \
+  -H 'Authorization: Basic <base64-encoded-credentials-string>' \
   -H 'accept: application/json'
 ```
 
@@ -72,57 +84,37 @@ curl -X GET \
 
 If the request is successful, it will return an HTTP status code `200` with the response payload below:
 ```
-[
-    {
-        "itemName": "iMac",
-        "sku": "1006",
-        "dateCreated": 1583254718000,
-        "dateUpdated": 1583254718000,
-        "quantityOnHand": 50,
-        "quantityAvailable": 50,
-        "customFields": {
+{
+    "result": "SUCCESS",
+    "message": "Successfully fetched items.",
+    "item": [
+        {
+            "itemName": "Mouse",
+            "sku": "1002",
+            "dateCreated": 1605745246000,
+            "dateUpdated": 1605745246000,
+            "quantityOnHand": 50,
+            "quantityAvailable": 50,
+            "customFields": {
 
+            },
+            "id": "59dc3c20-6c47-4800-baaa-1a2fa0d176e0"
         },
-        "id": "4933145d-41a9-45a7-8c92-d895696037cc"
-    },
-    {
-        "itemName": "Mouse",
-        "sku": "1002",
-        "dateCreated": 1583254718000,
-        "dateUpdated": 1583254718000,
-        "quantityOnHand": 50,
-        "quantityAvailable": 50,
-        "customFields": {
+        ...
+        {
+            "itemName": "Monitor",
+            "sku": "1001",
+            "dateCreated": 1605745246000,
+            "dateUpdated": 1605745246000,
+            "quantityOnHand": 50,
+            "quantityAvailable": 50,
+            "customFields": {
 
-        },
-        "id": "81fe47cc-67d1-4ba0-9490-74253fffc5a2"
-    },
-    ...
-    {
-        "itemName": "Monitor",
-        "sku": "1001",
-        "dateCreated": 1583254718000,
-        "dateUpdated": 1583254718000,
-        "quantityOnHand": 50,
-        "quantityAvailable": 50,
-        "customFields": {
-
-        },
-        "id": "c6b5a092-bf44-4eb9-9594-b4d4707ecff2"
-    },
-    {
-        "itemName": "Mousepad",
-        "sku": "1004",
-        "dateCreated": 1583254718000,
-        "dateUpdated": 1583254718000,
-        "quantityOnHand": 50,
-        "quantityAvailable": 50,
-        "customFields": {
-
-        },
-        "id": "ea7c85e5-a9b1-435e-94d3-eae83497101f"
-    }
-]
+            },
+            "id": "fddb1ff0-1b10-4c75-b44d-aa2338ad3b65"
+        }
+    ]
+}
 ```
 
 `POST /items`
@@ -136,6 +128,7 @@ Create a new inventory item
 curl -X POST \
   http://localhost:8080/api/mock-inventory-api/items \
   -H 'Accept: application/json' \
+  -H 'Authorization: Basic <base64-encoded-credentials-string>' \
   -H 'Content-Type: application/json' \
   -d '{
     "itemName": "Shampoo",
@@ -150,6 +143,7 @@ curl -X POST \
 curl -X POST \
   http://localhost:8080/api/mock-inventory-api/items \
   -H 'Accept: application/json' \
+  -H 'Authorization: Basic <base64-encoded-credentials-string>' \
   -H 'Content-Type: application/json' \
   -d '{
     "itemName": "Shampoo",
@@ -168,7 +162,19 @@ If the request is successful, it will return an HTTP status code `201` with the 
 ```
 {
     "result": "SUCCESS",
-    "message": "Successfully created item with id: 82ba2d7a-a40b-42cf-9e52-1d86fe37896c."
+    "message": "Successfully created item with id: 5cd2ac33-7004-4e74-9200-b3b1112a6f25.",
+    "item": {
+        "itemName": "Mac-mini",
+        "sku": "1005",
+        "dateCreated": 1605745246000,
+        "dateUpdated": 1605745246000,
+        "quantityOnHand": 50,
+        "quantityAvailable": 50,
+        "customFields": {
+
+        },
+        "id": "5cd2ac33-7004-4e74-9200-b3b1112a6f25"
+    }
 }
 ```
 
@@ -182,6 +188,7 @@ Returns a single inventory item that matches the given `itemId`
 ```
 curl -X GET \
   http://localhost:8080/api/mock-inventory-api/items/82ba2d7a-a40b-42cf-9e52-1d86fe37896c \
+  -H 'Authorization: Basic <base64-encoded-credentials-string>' \
   -H 'Accept: application/json'
 ```
 
@@ -190,16 +197,20 @@ curl -X GET \
 If the request is successful, it will return an HTTP status code `200` with the response payload below.
 ```
 {
-    "itemName": "Shampoo",
-    "sku": "smp-1",
-    "dateCreated": 1583256393000,
-    "dateUpdated": 1583256808000,
-    "quantityOnHand": 30,
-    "quantityAvailable": 20,
-    "customFields": {
-        "testField": "test"
-    },
-    "id": "82ba2d7a-a40b-42cf-9e52-1d86fe37896c"
+    "result": "SUCCESS",
+    "message": "Successfully fetched inventory item.",
+    "item": {
+        "itemName": "Mac-mini",
+        "sku": "1005",
+        "dateCreated": 1605745246000,
+        "dateUpdated": 1605745246000,
+        "quantityOnHand": 50,
+        "quantityAvailable": 50,
+        "customFields": {
+
+        },
+        "id": "82ba2d7a-a40b-42cf-9e52-1d86fe37896c"
+    }
 }
 ```
 
@@ -214,6 +225,7 @@ Updates the inventory item that matches the given `itemId`
 curl -X PATCH \
   http://localhost:8080/api/mock-inventory-api/items/82ba2d7a-a40b-42cf-9e52-1d86fe37896c \
   -H 'Accept: application/json' \
+  -H 'Authorization: Basic <base64-encoded-credentials-string>' \
   -H 'Content-Type: application/json' \
   -d '{
     "name": "Industrial Shampoo",
@@ -229,7 +241,18 @@ If the request is successful, it will return an HTTP status code of `200` with t
 ```
 {
     "result": "SUCCESS",
-    "message": "Successfully updated item with id \"82ba2d7a-a40b-42cf-9e52-1d86fe37896c\"."
+    "message": "Successfully updated item with id \"82ba2d7a-a40b-42cf-9e52-1d86fe37896c\".",
+    "item": {
+        "itemName": "Industrial Shampoo",
+        "sku": "1005",
+        "dateCreated": 1605745246000,
+        "dateUpdated": 1605857738000,
+        "quantityOnHand": 50,
+        "quantityAvailable": 50,
+        "customFields": {
+
+        }
+    }
 }
 ```
 
@@ -249,6 +272,7 @@ Used for updating either `quantity-on-hand` or `quantity-available` of an invent
 curl -X PATCH \
   http://localhost:8080/api/mock-inventory-api/items/82ba2d7a-a40b-42cf-9e52-1d86fe37896c/quantity-on-hand \
   -H 'Accept: application/json' \
+  -H 'Authorization: Basic <base64-encoded-credentials-string>' \
   -H 'Content-Type: application/json' \
   -d '{
     "quantity": "10",
@@ -276,9 +300,17 @@ Deletes a inventory item that matches the `itemId`
 **curl**
 ```
 curl -X DELETE \
-  http://localhost:8080/api/mock-inventory-api/items/82ba2d7a-a40b-42cf-9e52-1d86fe37896c
+  http://localhost:8080/api/mock-inventory-api/items/5cd2ac33-7004-4e74-9200-b3b1112a6f24 \
+  -H 'Accept: application/json' \
+  -H 'Authorization: Basic <base64-encoded-credentials-string>'
 ```
 
 **Sample Response**
 
-If the request is successful, it will return an HTTP status code of `204`.
+If the request is successful, it will return an HTTP status code of `200`.
+```
+{
+    "result": "Success",
+    "message": "Successfully deleted item with id 5cd2ac33-7004-4e74-9200-b3b1112a6f24"
+}
+```

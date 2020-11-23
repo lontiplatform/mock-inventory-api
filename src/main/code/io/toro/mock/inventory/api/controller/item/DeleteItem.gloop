@@ -1,5 +1,4 @@
 {
-    "comments": "### Delete Item\n\nThis service will delete the item in mock Inventory API",
     "input": [
         {
             "name": "itemId"
@@ -16,6 +15,11 @@
             "name": "responseCode",
             "type": "integer",
             "defaultValue": 200
+        },
+        {
+            "name": "APIException",
+            "type": "model",
+            "reference": "io.toro.martini.api.APIException"
         }
     ],
     "steps": [
@@ -111,7 +115,7 @@
                                         },
                                         {
                                             "type": "set",
-                                            "expression": "204",
+                                            "expression": "200",
                                             "to": [
                                                 "responseCode"
                                             ]
@@ -134,13 +138,11 @@
                             "comments": "If the Get Item service failed for some reason, map the error response and response code",
                             "lines": [
                                 {
-                                    "from": [
-                                        "getItemResponse",
-                                        "message"
-                                    ],
+                                    "type": "set",
+                                    "expression": "ERROR",
                                     "to": [
                                         "APIResponse",
-                                        "message"
+                                        "result"
                                     ]
                                 },
                                 {
@@ -156,8 +158,28 @@
                                     "type": "set",
                                     "expression": "ERROR",
                                     "to": [
-                                        "APIResponse",
+                                        "APIException",
                                         "result"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "getItemResponse",
+                                        "message"
+                                    ],
+                                    "to": [
+                                        "APIException",
+                                        "message"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "getItemResponse",
+                                        "responseCode"
+                                    ],
+                                    "to": [
+                                        "APIException",
+                                        "httpErrorCode"
                                     ]
                                 }
                             ]

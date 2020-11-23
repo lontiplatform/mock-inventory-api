@@ -1,5 +1,4 @@
 {
-    "comments": "### Update Item Quantity\n\nThis service will update the quantity of the item in mock Inventory API",
     "input": [
         {
             "name": "itemId",
@@ -47,6 +46,11 @@
             "name": "responseCode",
             "type": "integer",
             "defaultValue": 200
+        },
+        {
+            "name": "APIException",
+            "type": "model",
+            "reference": "io.toro.martini.api.APIException"
         }
     ],
     "steps": [
@@ -143,6 +147,7 @@
                         },
                         {
                             "from": [
+                                "APIResponse",
                                 "item"
                             ],
                             "to": [
@@ -300,27 +305,35 @@
                                             ],
                                             "outputs": [
                                                 {
+                                                    "type": "set",
+                                                    "expression": "400",
+                                                    "to": [
+                                                        "responseCode"
+                                                    ]
+                                                },
+                                                {
                                                     "from": [
                                                         "output"
                                                     ],
                                                     "to": [
-                                                        "APIResponse",
+                                                        "APIException",
                                                         "message"
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "set",
-                                                    "expression": "ERROR",
-                                                    "to": [
-                                                        "APIResponse",
-                                                        "result"
                                                     ]
                                                 },
                                                 {
                                                     "type": "set",
                                                     "expression": "400",
                                                     "to": [
-                                                        "responseCode"
+                                                        "APIException",
+                                                        "httpErrorCode"
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "set",
+                                                    "expression": "ERROR",
+                                                    "to": [
+                                                        "APIException",
+                                                        "result"
                                                     ]
                                                 }
                                             ]

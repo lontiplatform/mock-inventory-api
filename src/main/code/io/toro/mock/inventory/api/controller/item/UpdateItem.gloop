@@ -1,5 +1,4 @@
 {
-    "comments": "### Update Item\n\nThis service will update the item in mock Inventory API",
     "input": [
         {
             "name": "itemId"
@@ -35,12 +34,29 @@
             "name": "APIResponse",
             "type": "model",
             "comments": "API response",
-            "reference": "io.toro.mock.inventory.model.APIResponse"
+            "reference": "io.toro.mock.inventory.model.APIResponse",
+            "gloopProperties": [
+                {
+                    "name": "item",
+                    "type": "model",
+                    "reference": "io.toro.mock.inventory.model.item.Item",
+                    "gloopProperties": [
+                        {
+                            "name": "id"
+                        }
+                    ]
+                }
+            ]
         },
         {
             "name": "responseCode",
             "type": "integer",
             "defaultValue": 200
+        },
+        {
+            "name": "APIException",
+            "type": "model",
+            "reference": "io.toro.martini.api.APIException"
         }
     ],
     "steps": [
@@ -94,14 +110,6 @@
                     "outputs": [
                         {
                             "from": [
-                                "item"
-                            ],
-                            "to": [
-                                "tempItem"
-                            ]
-                        },
-                        {
-                            "from": [
                                 "APIResponse",
                                 "message"
                             ],
@@ -116,6 +124,31 @@
                             ],
                             "to": [
                                 "getItemResponse",
+                                "responseCode"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "APIResponse",
+                                "item"
+                            ],
+                            "to": [
+                                "tempItem"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "APIException"
+                            ],
+                            "to": [
+                                "APIException"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "responseCode"
+                            ],
+                            "to": [
                                 "responseCode"
                             ]
                         }
@@ -159,6 +192,16 @@
                                 {
                                     "type": "invokeGloop",
                                     "name": "io.toro.mock.inventory.sql.item.UpdateItem",
+                                    "declare": [
+                                        {
+                                            "variables": [
+                                                {
+                                                    "name": "recordUpdated",
+                                                    "type": "boolean"
+                                                }
+                                            ]
+                                        }
+                                    ],
                                     "unload": [
                                         [
                                             "tempItem"
@@ -234,53 +277,221 @@
                                         },
                                         {
                                             "type": "set",
-                                            "expression": "SUCCESS",
-                                            "to": [
-                                                "APIResponse",
-                                                "result"
-                                            ]
-                                        },
-                                        {
-                                            "type": "set",
-                                            "expression": "\"Successfully updated item with id \\\"${itemId}\\\".\"",
+                                            "expression": "$gloopOutput.updateCount > 0",
                                             "evaluate": true,
                                             "to": [
-                                                "APIResponse",
-                                                "message"
+                                                "recordUpdated"
                                             ]
                                         }
                                     ]
-                                }
-                            ]
-                        },
-                        {
-                            "label": "$else",
-                            "lines": [
-                                {
-                                    "from": [
-                                        "getItemResponse",
-                                        "message"
-                                    ],
-                                    "to": [
-                                        "APIResponse",
-                                        "message"
-                                    ]
                                 },
                                 {
-                                    "from": [
-                                        "getItemResponse",
-                                        "responseCode"
-                                    ],
-                                    "to": [
-                                        "responseCode"
-                                    ]
-                                },
-                                {
-                                    "type": "set",
-                                    "expression": "ERROR",
-                                    "to": [
-                                        "APIResponse",
-                                        "result"
+                                    "type": "fork",
+                                    "expression": "recordUpdated",
+                                    "children": [
+                                        {
+                                            "type": "block",
+                                            "label": "true",
+                                            "children": [
+                                                {
+                                                    "type": "invokeGloop",
+                                                    "name": "io.toro.mock.inventory.sql.item.SelectItem",
+                                                    "declare": [
+                                                        {
+                                                            "variables": [
+                                                                {
+                                                                    "name": "CUSTOM_FIELDS",
+                                                                    "required": true
+                                                                }
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "inputs": [
+                                                        {
+                                                            "from": [
+                                                                "itemId"
+                                                            ],
+                                                            "to": [
+                                                                "selectItemInput",
+                                                                "itemId"
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "outputs": [
+                                                        {
+                                                            "from": [
+                                                                "selectItemOutput",
+                                                                "SKU"
+                                                            ],
+                                                            "to": [
+                                                                "APIResponse",
+                                                                "item",
+                                                                "sku"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "from": [
+                                                                "selectItemOutput",
+                                                                "ITEM_NAME"
+                                                            ],
+                                                            "to": [
+                                                                "APIResponse",
+                                                                "item",
+                                                                "itemName"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "from": [
+                                                                "selectItemOutput",
+                                                                "QUANTITY_ON_HAND"
+                                                            ],
+                                                            "to": [
+                                                                "APIResponse",
+                                                                "item",
+                                                                "quantityOnHand"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "from": [
+                                                                "selectItemOutput",
+                                                                "QUANTITY_AVAILABLE"
+                                                            ],
+                                                            "to": [
+                                                                "APIResponse",
+                                                                "item",
+                                                                "quantityAvailable"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "from": [
+                                                                "selectItemOutput",
+                                                                "DATE_CREATED"
+                                                            ],
+                                                            "to": [
+                                                                "APIResponse",
+                                                                "item",
+                                                                "dateCreated"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "from": [
+                                                                "selectItemOutput",
+                                                                "DATE_UPDATED"
+                                                            ],
+                                                            "to": [
+                                                                "APIResponse",
+                                                                "item",
+                                                                "dateUpdated"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "from": [
+                                                                "selectItemOutput",
+                                                                "CUSTOM_FIELDS"
+                                                            ],
+                                                            "to": [
+                                                                "CUSTOM_FIELDS"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "from": [
+                                                                "selectItemOutput",
+                                                                "ID"
+                                                            ],
+                                                            "to": [
+                                                                "APIResponse",
+                                                                "item",
+                                                                "id"
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "invokeCode",
+                                                    "comments": "If a record is found, convert the JSON string for the custom field into a Gloop model, and them map it to the customFields Gloop model in the item model.",
+                                                    "className": "io.toro.martini.JsonMethods",
+                                                    "methodName": "jsonStringToGloopObject",
+                                                    "parameters": [
+                                                        "java.lang.String"
+                                                    ],
+                                                    "inputs": [
+                                                        {
+                                                            "from": [
+                                                                "CUSTOM_FIELDS"
+                                                            ],
+                                                            "to": [
+                                                                "jsonString"
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "outputs": [
+                                                        {
+                                                            "from": [
+                                                                "output"
+                                                            ],
+                                                            "to": [
+                                                                "APIResponse",
+                                                                "item",
+                                                                "customFields"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "set",
+                                                            "expression": "200",
+                                                            "to": [
+                                                                "responseCode"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "set",
+                                                            "expression": "SUCCESS",
+                                                            "to": [
+                                                                "APIResponse",
+                                                                "result"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "set",
+                                                            "expression": "\"Successfully updated item with id \\\"${itemId}\\\".\"",
+                                                            "evaluate": true,
+                                                            "to": [
+                                                                "APIResponse",
+                                                                "message"
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "label": "false",
+                                            "lines": [
+                                                {
+                                                    "type": "set",
+                                                    "expression": "ERROR",
+                                                    "to": [
+                                                        "APIException",
+                                                        "result"
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "set",
+                                                    "expression": "400",
+                                                    "to": [
+                                                        "APIException",
+                                                        "httpErrorCode"
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "set",
+                                                    "expression": "Failed to update record. Check Martini logs for more info.",
+                                                    "to": [
+                                                        "APIException",
+                                                        "message"
+                                                    ]
+                                                }
+                                            ]
+                                        }
                                     ]
                                 }
                             ]
@@ -334,17 +545,16 @@
                                     "type": "set",
                                     "expression": "ERROR",
                                     "to": [
-                                        "APIResponse",
+                                        "APIException",
                                         "result"
                                     ]
                                 },
                                 {
                                     "type": "set",
-                                    "expression": "$gloopException.message",
-                                    "evaluate": true,
+                                    "expression": "400",
                                     "to": [
-                                        "APIResponse",
-                                        "message"
+                                        "APIException",
+                                        "httpErrorCode"
                                     ]
                                 }
                             ]
@@ -381,26 +591,33 @@
                             "outputs": [
                                 {
                                     "type": "set",
-                                    "expression": "ERROR",
+                                    "expression": "500",
                                     "to": [
-                                        "APIResponse",
-                                        "result"
+                                        "responseCode"
                                     ]
                                 },
                                 {
                                     "type": "set",
-                                    "expression": "$gloopException.message",
-                                    "evaluate": true,
+                                    "expression": "ERROR",
                                     "to": [
-                                        "APIResponse",
-                                        "message"
+                                        "APIException",
+                                        "result"
                                     ]
                                 },
                                 {
                                     "type": "set",
                                     "expression": "500",
                                     "to": [
-                                        "responseCode"
+                                        "APIException",
+                                        "httpErrorCode"
+                                    ]
+                                },
+                                {
+                                    "type": "set",
+                                    "expression": "Encountered an exception while processing the request.",
+                                    "to": [
+                                        "APIException",
+                                        "message"
                                     ]
                                 }
                             ]

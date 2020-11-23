@@ -1,29 +1,35 @@
 {
-    "comments": "### List Item\n\nThis service will list all the items in mock Inventory API",
     "output": [
-        {
-            "name": "item",
-            "type": "model",
-            "array": true,
-            "comments": "List of inventory items",
-            "reference": "io.toro.mock.inventory.model.item.Item",
-            "gloopProperties": [
-                {
-                    "name": "id"
-                }
-            ]
-        },
         {
             "name": "APIResponse",
             "type": "model",
             "comments": "API response that contains the error message",
-            "reference": "io.toro.mock.inventory.model.APIResponse"
+            "reference": "io.toro.mock.inventory.model.APIResponse",
+            "gloopProperties": [
+                {
+                    "name": "item",
+                    "type": "model",
+                    "array": true,
+                    "comments": "List of inventory items",
+                    "reference": "io.toro.mock.inventory.model.item.Item",
+                    "gloopProperties": [
+                        {
+                            "name": "id"
+                        }
+                    ]
+                }
+            ]
         },
         {
             "name": "responseCode",
             "type": "integer",
             "defaultValue": 200,
             "comments": "The HTTP request response code for the request"
+        },
+        {
+            "name": "APIException",
+            "type": "model",
+            "reference": "io.toro.martini.api.APIException"
         }
     ],
     "steps": [
@@ -95,6 +101,22 @@
                             "to": [
                                 "selectAllItemsOutputCursor"
                             ]
+                        },
+                        {
+                            "type": "set",
+                            "expression": "SUCCESS",
+                            "to": [
+                                "APIResponse",
+                                "result"
+                            ]
+                        },
+                        {
+                            "type": "set",
+                            "expression": "Successfully fetched items.",
+                            "to": [
+                                "APIResponse",
+                                "message"
+                            ]
                         }
                     ]
                 },
@@ -108,6 +130,7 @@
                     },
                     "output": {
                         "path": [
+                            "APIResponse",
                             "item"
                         ]
                     },
@@ -118,59 +141,10 @@
                                 {
                                     "from": [
                                         "selectAllItemsOutputCursor",
-                                        "ITEM_NAME"
-                                    ],
-                                    "to": [
-                                        "item",
-                                        "itemName"
-                                    ]
-                                },
-                                {
-                                    "from": [
-                                        "selectAllItemsOutputCursor",
-                                        "QUANTITY_ON_HAND"
-                                    ],
-                                    "to": [
-                                        "item",
-                                        "quantityOnHand"
-                                    ]
-                                },
-                                {
-                                    "from": [
-                                        "selectAllItemsOutputCursor",
-                                        "QUANTITY_AVAILABLE"
-                                    ],
-                                    "to": [
-                                        "item",
-                                        "quantityAvailable"
-                                    ]
-                                },
-                                {
-                                    "from": [
-                                        "selectAllItemsOutputCursor",
-                                        "DATE_CREATED"
-                                    ],
-                                    "to": [
-                                        "item",
-                                        "dateCreated"
-                                    ]
-                                },
-                                {
-                                    "from": [
-                                        "selectAllItemsOutputCursor",
-                                        "DATE_UPDATED"
-                                    ],
-                                    "to": [
-                                        "item",
-                                        "dateUpdated"
-                                    ]
-                                },
-                                {
-                                    "from": [
-                                        "selectAllItemsOutputCursor",
                                         "ID"
                                     ],
                                     "to": [
+                                        "APIResponse",
                                         "item",
                                         "id"
                                     ]
@@ -181,8 +155,64 @@
                                         "SKU"
                                     ],
                                     "to": [
+                                        "APIResponse",
                                         "item",
                                         "sku"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "selectAllItemsOutputCursor",
+                                        "ITEM_NAME"
+                                    ],
+                                    "to": [
+                                        "APIResponse",
+                                        "item",
+                                        "itemName"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "selectAllItemsOutputCursor",
+                                        "QUANTITY_ON_HAND"
+                                    ],
+                                    "to": [
+                                        "APIResponse",
+                                        "item",
+                                        "quantityOnHand"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "selectAllItemsOutputCursor",
+                                        "QUANTITY_AVAILABLE"
+                                    ],
+                                    "to": [
+                                        "APIResponse",
+                                        "item",
+                                        "quantityAvailable"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "selectAllItemsOutputCursor",
+                                        "DATE_CREATED"
+                                    ],
+                                    "to": [
+                                        "APIResponse",
+                                        "item",
+                                        "dateCreated"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "selectAllItemsOutputCursor",
+                                        "DATE_UPDATED"
+                                    ],
+                                    "to": [
+                                        "APIResponse",
+                                        "item",
+                                        "dateUpdated"
                                     ]
                                 }
                             ]
@@ -212,6 +242,7 @@
                                         "output"
                                     ],
                                     "to": [
+                                        "APIResponse",
                                         "item",
                                         "customFields"
                                     ]
@@ -254,14 +285,6 @@
                     "outputs": [
                         {
                             "type": "set",
-                            "expression": "ERROR",
-                            "to": [
-                                "APIResponse",
-                                "result"
-                            ]
-                        },
-                        {
-                            "type": "set",
                             "expression": "500",
                             "to": [
                                 "responseCode"
@@ -269,10 +292,25 @@
                         },
                         {
                             "type": "set",
-                            "expression": "$gloopException.message",
-                            "evaluate": true,
+                            "expression": "ERROR",
                             "to": [
-                                "APIResponse",
+                                "APIException",
+                                "result"
+                            ]
+                        },
+                        {
+                            "type": "set",
+                            "expression": "500",
+                            "to": [
+                                "APIException",
+                                "httpErrorCode"
+                            ]
+                        },
+                        {
+                            "type": "set",
+                            "expression": "Encountered an exception while processing the request.",
+                            "to": [
+                                "APIException",
                                 "message"
                             ]
                         }
