@@ -31,7 +31,7 @@
     ],
     "output": [
         {
-            "name": "APIResponse",
+            "name": "response",
             "type": "model",
             "comments": "API response",
             "reference": "io.toro.mock.inventory.model.APIResponse",
@@ -54,7 +54,7 @@
             "defaultValue": 200
         },
         {
-            "name": "APIException",
+            "name": "exception",
             "type": "model",
             "reference": "io.toro.martini.api.APIException"
         }
@@ -110,16 +110,6 @@
                     "outputs": [
                         {
                             "from": [
-                                "APIResponse",
-                                "message"
-                            ],
-                            "to": [
-                                "getItemResponse",
-                                "message"
-                            ]
-                        },
-                        {
-                            "from": [
                                 "responseCode"
                             ],
                             "to": [
@@ -129,7 +119,25 @@
                         },
                         {
                             "from": [
-                                "APIResponse",
+                                "responseCode"
+                            ],
+                            "to": [
+                                "responseCode"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "response",
+                                "message"
+                            ],
+                            "to": [
+                                "getItemResponse",
+                                "message"
+                            ]
+                        },
+                        {
+                            "from": [
+                                "response",
                                 "item"
                             ],
                             "to": [
@@ -138,18 +146,10 @@
                         },
                         {
                             "from": [
-                                "APIException"
+                                "exception"
                             ],
                             "to": [
-                                "APIException"
-                            ]
-                        },
-                        {
-                            "from": [
-                                "responseCode"
-                            ],
-                            "to": [
-                                "responseCode"
+                                "exception"
                             ]
                         }
                     ]
@@ -321,72 +321,6 @@
                                                         {
                                                             "from": [
                                                                 "selectItemOutput",
-                                                                "SKU"
-                                                            ],
-                                                            "to": [
-                                                                "APIResponse",
-                                                                "item",
-                                                                "sku"
-                                                            ]
-                                                        },
-                                                        {
-                                                            "from": [
-                                                                "selectItemOutput",
-                                                                "ITEM_NAME"
-                                                            ],
-                                                            "to": [
-                                                                "APIResponse",
-                                                                "item",
-                                                                "itemName"
-                                                            ]
-                                                        },
-                                                        {
-                                                            "from": [
-                                                                "selectItemOutput",
-                                                                "QUANTITY_ON_HAND"
-                                                            ],
-                                                            "to": [
-                                                                "APIResponse",
-                                                                "item",
-                                                                "quantityOnHand"
-                                                            ]
-                                                        },
-                                                        {
-                                                            "from": [
-                                                                "selectItemOutput",
-                                                                "QUANTITY_AVAILABLE"
-                                                            ],
-                                                            "to": [
-                                                                "APIResponse",
-                                                                "item",
-                                                                "quantityAvailable"
-                                                            ]
-                                                        },
-                                                        {
-                                                            "from": [
-                                                                "selectItemOutput",
-                                                                "DATE_CREATED"
-                                                            ],
-                                                            "to": [
-                                                                "APIResponse",
-                                                                "item",
-                                                                "dateCreated"
-                                                            ]
-                                                        },
-                                                        {
-                                                            "from": [
-                                                                "selectItemOutput",
-                                                                "DATE_UPDATED"
-                                                            ],
-                                                            "to": [
-                                                                "APIResponse",
-                                                                "item",
-                                                                "dateUpdated"
-                                                            ]
-                                                        },
-                                                        {
-                                                            "from": [
-                                                                "selectItemOutput",
                                                                 "CUSTOM_FIELDS"
                                                             ],
                                                             "to": [
@@ -399,9 +333,75 @@
                                                                 "ID"
                                                             ],
                                                             "to": [
-                                                                "APIResponse",
+                                                                "response",
                                                                 "item",
                                                                 "id"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "from": [
+                                                                "selectItemOutput",
+                                                                "QUANTITY_AVAILABLE"
+                                                            ],
+                                                            "to": [
+                                                                "response",
+                                                                "item",
+                                                                "quantityAvailable"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "from": [
+                                                                "selectItemOutput",
+                                                                "QUANTITY_ON_HAND"
+                                                            ],
+                                                            "to": [
+                                                                "response",
+                                                                "item",
+                                                                "quantityOnHand"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "from": [
+                                                                "selectItemOutput",
+                                                                "DATE_UPDATED"
+                                                            ],
+                                                            "to": [
+                                                                "response",
+                                                                "item",
+                                                                "dateUpdated"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "from": [
+                                                                "selectItemOutput",
+                                                                "DATE_CREATED"
+                                                            ],
+                                                            "to": [
+                                                                "response",
+                                                                "item",
+                                                                "dateCreated"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "from": [
+                                                                "selectItemOutput",
+                                                                "ITEM_NAME"
+                                                            ],
+                                                            "to": [
+                                                                "response",
+                                                                "item",
+                                                                "itemName"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "from": [
+                                                                "selectItemOutput",
+                                                                "SKU"
+                                                            ],
+                                                            "to": [
+                                                                "response",
+                                                                "item",
+                                                                "sku"
                                                             ]
                                                         }
                                                     ]
@@ -426,16 +426,6 @@
                                                     ],
                                                     "outputs": [
                                                         {
-                                                            "from": [
-                                                                "output"
-                                                            ],
-                                                            "to": [
-                                                                "APIResponse",
-                                                                "item",
-                                                                "customFields"
-                                                            ]
-                                                        },
-                                                        {
                                                             "type": "set",
                                                             "expression": "200",
                                                             "to": [
@@ -443,20 +433,30 @@
                                                             ]
                                                         },
                                                         {
-                                                            "type": "set",
-                                                            "expression": "SUCCESS",
+                                                            "from": [
+                                                                "output"
+                                                            ],
                                                             "to": [
-                                                                "APIResponse",
-                                                                "result"
+                                                                "response",
+                                                                "item",
+                                                                "customFields"
                                                             ]
                                                         },
                                                         {
                                                             "type": "set",
-                                                            "expression": "\"Successfully updated item with id \\\"${itemId}\\\".\"",
+                                                            "expression": "\"Successfully updated item with id: ${itemId}.\"",
                                                             "evaluate": true,
                                                             "to": [
-                                                                "APIResponse",
+                                                                "response",
                                                                 "message"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "set",
+                                                            "expression": "SUCCESS",
+                                                            "to": [
+                                                                "response",
+                                                                "result"
                                                             ]
                                                         }
                                                     ]
@@ -470,7 +470,7 @@
                                                     "type": "set",
                                                     "expression": "ERROR",
                                                     "to": [
-                                                        "APIException",
+                                                        "exception",
                                                         "result"
                                                     ]
                                                 },
@@ -478,15 +478,15 @@
                                                     "type": "set",
                                                     "expression": "400",
                                                     "to": [
-                                                        "APIException",
+                                                        "exception",
                                                         "httpErrorCode"
                                                     ]
                                                 },
                                                 {
                                                     "type": "set",
-                                                    "expression": "Failed to update record. Check Martini logs for more info.",
+                                                    "expression": "Failed to update the record. Check Martini logs for more info.",
                                                     "to": [
-                                                        "APIException",
+                                                        "exception",
                                                         "message"
                                                     ]
                                                 }
@@ -545,7 +545,7 @@
                                     "type": "set",
                                     "expression": "ERROR",
                                     "to": [
-                                        "APIException",
+                                        "exception",
                                         "result"
                                     ]
                                 },
@@ -553,7 +553,7 @@
                                     "type": "set",
                                     "expression": "400",
                                     "to": [
-                                        "APIException",
+                                        "exception",
                                         "httpErrorCode"
                                     ]
                                 }
@@ -600,7 +600,7 @@
                                     "type": "set",
                                     "expression": "ERROR",
                                     "to": [
-                                        "APIException",
+                                        "exception",
                                         "result"
                                     ]
                                 },
@@ -608,7 +608,7 @@
                                     "type": "set",
                                     "expression": "500",
                                     "to": [
-                                        "APIException",
+                                        "exception",
                                         "httpErrorCode"
                                     ]
                                 },
@@ -616,7 +616,7 @@
                                     "type": "set",
                                     "expression": "Encountered an exception while processing the request.",
                                     "to": [
-                                        "APIException",
+                                        "exception",
                                         "message"
                                     ]
                                 }

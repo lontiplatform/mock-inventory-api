@@ -6,7 +6,7 @@
     ],
     "output": [
         {
-            "name": "APIResponse",
+            "name": "response",
             "type": "model",
             "comments": "API response",
             "reference": "io.toro.mock.inventory.model.APIResponse"
@@ -17,7 +17,7 @@
             "defaultValue": 200
         },
         {
-            "name": "APIException",
+            "name": "exception",
             "type": "model",
             "reference": "io.toro.martini.api.APIException"
         }
@@ -63,21 +63,21 @@
                     "outputs": [
                         {
                             "from": [
-                                "APIResponse",
-                                "message"
+                                "responseCode"
                             ],
                             "to": [
                                 "getItemResponse",
-                                "message"
+                                "responseCode"
                             ]
                         },
                         {
                             "from": [
-                                "responseCode"
+                                "response",
+                                "message"
                             ],
                             "to": [
                                 "getItemResponse",
-                                "responseCode"
+                                "message"
                             ]
                         }
                     ]
@@ -107,14 +107,6 @@
                                     "outputs": [
                                         {
                                             "type": "set",
-                                            "expression": "SUCCESS",
-                                            "to": [
-                                                "APIResponse",
-                                                "result"
-                                            ]
-                                        },
-                                        {
-                                            "type": "set",
                                             "expression": "200",
                                             "to": [
                                                 "responseCode"
@@ -122,11 +114,19 @@
                                         },
                                         {
                                             "type": "set",
-                                            "expression": "\"Successfully deleted item with id \\\"${itemId}\\\".\"",
+                                            "expression": "\"Successfully deleted item with id: ${itemId}.\"",
                                             "evaluate": true,
                                             "to": [
-                                                "APIResponse",
+                                                "response",
                                                 "message"
+                                            ]
+                                        },
+                                        {
+                                            "type": "set",
+                                            "expression": "SUCCESS",
+                                            "to": [
+                                                "response",
+                                                "result"
                                             ]
                                         }
                                     ]
@@ -138,14 +138,6 @@
                             "comments": "If the Get Item service failed for some reason, map the error response and response code",
                             "lines": [
                                 {
-                                    "type": "set",
-                                    "expression": "ERROR",
-                                    "to": [
-                                        "APIResponse",
-                                        "result"
-                                    ]
-                                },
-                                {
                                     "from": [
                                         "getItemResponse",
                                         "responseCode"
@@ -155,31 +147,31 @@
                                     ]
                                 },
                                 {
-                                    "type": "set",
-                                    "expression": "ERROR",
-                                    "to": [
-                                        "APIException",
-                                        "result"
-                                    ]
-                                },
-                                {
-                                    "from": [
-                                        "getItemResponse",
-                                        "message"
-                                    ],
-                                    "to": [
-                                        "APIException",
-                                        "message"
-                                    ]
-                                },
-                                {
                                     "from": [
                                         "getItemResponse",
                                         "responseCode"
                                     ],
                                     "to": [
-                                        "APIException",
+                                        "exception",
                                         "httpErrorCode"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "getItemResponse",
+                                        "message"
+                                    ],
+                                    "to": [
+                                        "exception",
+                                        "message"
+                                    ]
+                                },
+                                {
+                                    "type": "set",
+                                    "expression": "ERROR",
+                                    "to": [
+                                        "exception",
+                                        "result"
                                     ]
                                 }
                             ]
@@ -229,16 +221,23 @@
                             "type": "set",
                             "expression": "ERROR",
                             "to": [
-                                "APIResponse",
+                                "exception",
                                 "result"
                             ]
                         },
                         {
                             "type": "set",
-                            "expression": "$gloopException.message",
-                            "evaluate": true,
+                            "expression": "500",
                             "to": [
-                                "APIResponse",
+                                "exception",
+                                "httpErrorCode"
+                            ]
+                        },
+                        {
+                            "type": "set",
+                            "expression": "Encountered an exception while processing the request.",
+                            "to": [
+                                "exception",
                                 "message"
                             ]
                         }

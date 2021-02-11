@@ -34,7 +34,7 @@
     ],
     "output": [
         {
-            "name": "APIResponse",
+            "name": "response",
             "type": "model",
             "comments": "API response",
             "reference": "io.toro.mock.inventory.model.APIResponse",
@@ -81,7 +81,7 @@
             "defaultValue": 200
         },
         {
-            "name": "APIException",
+            "name": "exception",
             "type": "model",
             "reference": "io.toro.martini.api.APIException"
         }
@@ -95,24 +95,24 @@
                     "comments": "Generates a random UUID that will serve as the record id of the inventory item to be created.",
                     "lines": [
                         {
-                            "from": [
-                                "item"
-                            ],
-                            "to": [
-                                "APIResponse",
-                                "item"
-                            ]
-                        },
-                        {
                             "type": "set",
                             "expression": "UUID.randomUUID()",
                             "evaluate": true,
                             "to": [
-                                "APIResponse",
+                                "response",
                                 "item",
                                 "id"
                             ],
                             "priority": 1
+                        },
+                        {
+                            "from": [
+                                "item"
+                            ],
+                            "to": [
+                                "response",
+                                "item"
+                            ]
                         }
                     ]
                 },
@@ -169,17 +169,20 @@
                                 "insertItemInput",
                                 "customFields"
                             ]
+                        },
+                        {
+                            "from": [
+                                "response",
+                                "item",
+                                "id"
+                            ],
+                            "to": [
+                                "insertItemInput",
+                                "id"
+                            ]
                         }
                     ],
                     "outputs": [
-                        {
-                            "type": "set",
-                            "expression": "SUCCESS",
-                            "to": [
-                                "APIResponse",
-                                "result"
-                            ]
-                        },
                         {
                             "type": "set",
                             "expression": "201",
@@ -189,166 +192,83 @@
                         },
                         {
                             "type": "set",
-                            "expression": "\"Successfully created item with id: ${id}.\"",
+                            "expression": "SUCCESS",
+                            "to": [
+                                "response",
+                                "result"
+                            ]
+                        },
+                        {
+                            "type": "set",
+                            "expression": "\"Successfully created item with id: ${response.item.id}.\"",
                             "evaluate": true,
                             "to": [
-                                "APIResponse",
+                                "response",
                                 "message"
-                            ],
-                            "priority": 1
+                            ]
                         }
                     ]
                 }
             ],
             "catch": [
                 {
-                    "type": "fork",
-                    "comments": "Check if the exception caught is an SQL Exception",
-                    "expression": "$gloopException.message.contains( 'java.sql.SQLIntegrityConstraintViolationException' )",
-                    "children": [
+                    "type": "invokeCode",
+                    "className": "io.toro.martini.LoggerMethods",
+                    "methodName": "error",
+                    "parameters": [
+                        "java.lang.String",
+                        "java.lang.Throwable"
+                    ],
+                    "inputs": [
                         {
-                            "type": "invokeCode",
-                            "label": "true",
-                            "comments": "If the exception caught is an SQLIntegrityConstraintViolationException, set the appropriate response code (400)",
-                            "className": "io.toro.martini.LoggerMethods",
-                            "methodName": "error",
-                            "parameters": [
-                                "java.lang.String",
-                                "java.lang.Throwable"
+                            "from": [
+                                "$gloopException",
+                                "gloopStackTrace"
                             ],
-                            "inputs": [
-                                {
-                                    "from": [
-                                        "$gloopException",
-                                        "realException"
-                                    ],
-                                    "to": [
-                                        "throwable"
-                                    ]
-                                },
-                                {
-                                    "from": [
-                                        "$gloopException",
-                                        "gloopStackTrace"
-                                    ],
-                                    "to": [
-                                        "message"
-                                    ]
-                                }
-                            ],
-                            "outputs": [
-                                {
-                                    "type": "set",
-                                    "expression": "ERROR",
-                                    "to": [
-                                        "APIResponse",
-                                        "result"
-                                    ]
-                                },
-                                {
-                                    "type": "set",
-                                    "expression": "$gloopException.message",
-                                    "evaluate": true,
-                                    "to": [
-                                        "APIResponse",
-                                        "message"
-                                    ]
-                                },
-                                {
-                                    "type": "set",
-                                    "expression": "400",
-                                    "to": [
-                                        "responseCode"
-                                    ]
-                                },
-                                {
-                                    "type": "set",
-                                    "expression": "ERROR",
-                                    "to": [
-                                        "APIException",
-                                        "result"
-                                    ]
-                                },
-                                {
-                                    "type": "set",
-                                    "expression": "400",
-                                    "to": [
-                                        "APIException",
-                                        "httpErrorCode"
-                                    ]
-                                },
-                                {
-                                    "type": "set",
-                                    "expression": "Item already exists.",
-                                    "to": [
-                                        "APIException",
-                                        "message"
-                                    ]
-                                }
+                            "to": [
+                                "message"
                             ]
                         },
                         {
-                            "type": "invokeCode",
-                            "label": "false",
-                            "comments": "If it's not an SQLIntegretyConstraintViolationException, set the approriate response code (500)",
-                            "className": "io.toro.martini.LoggerMethods",
-                            "methodName": "error",
-                            "parameters": [
-                                "java.lang.String",
-                                "java.lang.Throwable"
+                            "from": [
+                                "$gloopException",
+                                "realException"
                             ],
-                            "inputs": [
-                                {
-                                    "from": [
-                                        "$gloopException",
-                                        "realException"
-                                    ],
-                                    "to": [
-                                        "throwable"
-                                    ]
-                                },
-                                {
-                                    "from": [
-                                        "$gloopException",
-                                        "gloopStackTrace"
-                                    ],
-                                    "to": [
-                                        "message"
-                                    ]
-                                }
-                            ],
-                            "outputs": [
-                                {
-                                    "type": "set",
-                                    "expression": "500",
-                                    "to": [
-                                        "responseCode"
-                                    ]
-                                },
-                                {
-                                    "type": "set",
-                                    "expression": "500",
-                                    "to": [
-                                        "APIException",
-                                        "httpErrorCode"
-                                    ]
-                                },
-                                {
-                                    "type": "set",
-                                    "expression": "ERROR",
-                                    "to": [
-                                        "APIException",
-                                        "result"
-                                    ]
-                                },
-                                {
-                                    "type": "set",
-                                    "expression": "Encountered an exception while processing the request.",
-                                    "to": [
-                                        "APIException",
-                                        "message"
-                                    ]
-                                }
+                            "to": [
+                                "throwable"
+                            ]
+                        }
+                    ],
+                    "outputs": [
+                        {
+                            "type": "set",
+                            "expression": "500",
+                            "to": [
+                                "responseCode"
+                            ]
+                        },
+                        {
+                            "type": "set",
+                            "expression": "Internal Server Error.",
+                            "to": [
+                                "exception",
+                                "result"
+                            ]
+                        },
+                        {
+                            "type": "set",
+                            "expression": "500",
+                            "to": [
+                                "exception",
+                                "httpErrorCode"
+                            ]
+                        },
+                        {
+                            "type": "set",
+                            "expression": "Encountered an exception while processing the request.",
+                            "to": [
+                                "exception",
+                                "message"
                             ]
                         }
                     ]

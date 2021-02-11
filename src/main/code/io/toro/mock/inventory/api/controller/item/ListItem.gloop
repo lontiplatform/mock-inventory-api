@@ -1,7 +1,7 @@
 {
     "output": [
         {
-            "name": "APIResponse",
+            "name": "response",
             "type": "model",
             "comments": "API response that contains the error message",
             "reference": "io.toro.mock.inventory.model.APIResponse",
@@ -27,7 +27,7 @@
             "comments": "The HTTP request response code for the request"
         },
         {
-            "name": "APIException",
+            "name": "exception",
             "type": "model",
             "reference": "io.toro.martini.api.APIException"
         }
@@ -106,7 +106,7 @@
                             "type": "set",
                             "expression": "SUCCESS",
                             "to": [
-                                "APIResponse",
+                                "response",
                                 "result"
                             ]
                         },
@@ -114,7 +114,7 @@
                             "type": "set",
                             "expression": "Successfully fetched items.",
                             "to": [
-                                "APIResponse",
+                                "response",
                                 "message"
                             ]
                         }
@@ -130,7 +130,7 @@
                     },
                     "output": {
                         "path": [
-                            "APIResponse",
+                            "response",
                             "item"
                         ]
                     },
@@ -144,7 +144,7 @@
                                         "ID"
                                     ],
                                     "to": [
-                                        "APIResponse",
+                                        "response",
                                         "item",
                                         "id"
                                     ]
@@ -155,7 +155,7 @@
                                         "SKU"
                                     ],
                                     "to": [
-                                        "APIResponse",
+                                        "response",
                                         "item",
                                         "sku"
                                     ]
@@ -166,31 +166,9 @@
                                         "ITEM_NAME"
                                     ],
                                     "to": [
-                                        "APIResponse",
+                                        "response",
                                         "item",
                                         "itemName"
-                                    ]
-                                },
-                                {
-                                    "from": [
-                                        "selectAllItemsOutputCursor",
-                                        "QUANTITY_ON_HAND"
-                                    ],
-                                    "to": [
-                                        "APIResponse",
-                                        "item",
-                                        "quantityOnHand"
-                                    ]
-                                },
-                                {
-                                    "from": [
-                                        "selectAllItemsOutputCursor",
-                                        "QUANTITY_AVAILABLE"
-                                    ],
-                                    "to": [
-                                        "APIResponse",
-                                        "item",
-                                        "quantityAvailable"
                                     ]
                                 },
                                 {
@@ -199,7 +177,7 @@
                                         "DATE_CREATED"
                                     ],
                                     "to": [
-                                        "APIResponse",
+                                        "response",
                                         "item",
                                         "dateCreated"
                                     ]
@@ -210,9 +188,31 @@
                                         "DATE_UPDATED"
                                     ],
                                     "to": [
-                                        "APIResponse",
+                                        "response",
                                         "item",
                                         "dateUpdated"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "selectAllItemsOutputCursor",
+                                        "QUANTITY_ON_HAND"
+                                    ],
+                                    "to": [
+                                        "response",
+                                        "item",
+                                        "quantityOnHand"
+                                    ]
+                                },
+                                {
+                                    "from": [
+                                        "selectAllItemsOutputCursor",
+                                        "QUANTITY_AVAILABLE"
+                                    ],
+                                    "to": [
+                                        "response",
+                                        "item",
+                                        "quantityAvailable"
                                     ]
                                 }
                             ]
@@ -242,7 +242,7 @@
                                         "output"
                                     ],
                                     "to": [
-                                        "APIResponse",
+                                        "response",
                                         "item",
                                         "customFields"
                                     ]
@@ -294,7 +294,7 @@
                             "type": "set",
                             "expression": "ERROR",
                             "to": [
-                                "APIException",
+                                "exception",
                                 "result"
                             ]
                         },
@@ -302,7 +302,7 @@
                             "type": "set",
                             "expression": "500",
                             "to": [
-                                "APIException",
+                                "exception",
                                 "httpErrorCode"
                             ]
                         },
@@ -310,7 +310,7 @@
                             "type": "set",
                             "expression": "Encountered an exception while processing the request.",
                             "to": [
-                                "APIException",
+                                "exception",
                                 "message"
                             ]
                         }

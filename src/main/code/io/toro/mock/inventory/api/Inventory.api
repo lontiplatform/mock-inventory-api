@@ -1,7 +1,4 @@
 {
-    "authTypes": [
-        "BASIC"
-    ],
     "groups": [
         "ESBAPIAdminGroup"
     ],
@@ -32,7 +29,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "body": "APIResponse",
+                        "body": "response",
                         "description": "A list of inventory items will be returned by by this endpoint if the request is successful",
                         "responseBodyMockData": {
                             "mockDataType": "JSON",
@@ -40,7 +37,7 @@
                         }
                     },
                     "500": {
-                        "body": "APIException",
+                        "body": "response",
                         "description": "If the server encountered an exception while processing the request",
                         "responseBodyMockData": {
                             "mockDataType": "JSON",
@@ -70,23 +67,15 @@
                 },
                 "responses": {
                     "201": {
-                        "body": "APIResponse",
+                        "body": "response",
                         "description": "if the inventory item is created.",
                         "responseBodyMockData": {
                             "mockDataType": "JSON",
                             "mockData": "{\n    \"result\": \"SUCCESS\",\n    \"message\": \"Successfully created item with id: 5cd2ac33-7004-4e74-9200-b3b1112a6f25.\",\n    \"item\": {\n        \"itemName\": \"Mac-mini\",\n        \"sku\": \"1005\",\n        \"dateCreated\": 1605745246000,\n        \"dateUpdated\": 1605745246000,\n        \"quantityOnHand\": 50,\n        \"quantityAvailable\": 50,\n        \"customFields\": {\n\n        },\n        \"id\": \"5cd2ac33-7004-4e74-9200-b3b1112a6f25\"\n    }\n}"
                         }
                     },
-                    "400": {
-                        "body": "APIException",
-                        "description": "If the item already exists in the api",
-                        "responseBodyMockData": {
-                            "mockDataType": "JSON",
-                            "mockData": "{\n    \"result\": \"ERROR\",\n    \"httpErrorCode\": 500,\n    \"message\": \"Item already exists\"\n}"
-                        }
-                    },
                     "500": {
-                        "body": "APIException",
+                        "body": "exception",
                         "description": "If the server encountered an exception while processing the request",
                         "responseBodyMockData": {
                             "mockDataType": "JSON",
@@ -118,7 +107,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "body": "APIResponse",
+                        "body": "response",
                         "description": "Returns details about the requested inventory item record",
                         "responseBodyMockData": {
                             "mockDataType": "JSON",
@@ -126,7 +115,7 @@
                         }
                     },
                     "404": {
-                        "body": "APIException",
+                        "body": "exception",
                         "description": "If the record could not be found",
                         "responseBodyMockData": {
                             "mockDataType": "JSON",
@@ -134,7 +123,7 @@
                         }
                     },
                     "500": {
-                        "body": "APIException",
+                        "body": "exception",
                         "description": "If the service encountered an exception while executing the request",
                         "responseBodyMockData": {
                             "mockDataType": "JSON",
@@ -164,7 +153,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "body": "APIResponse",
+                        "body": "response",
                         "description": "If the inventory item is successfully deleted.",
                         "responseBodyMockData": {
                             "mockDataType": "JSON",
@@ -172,7 +161,7 @@
                         }
                     },
                     "404": {
-                        "body": "APIException",
+                        "body": "exception",
                         "description": "If the inventory item to be deleted could not be found.",
                         "responseBodyMockData": {
                             "mockDataType": "JSON",
@@ -180,7 +169,7 @@
                         }
                     },
                     "500": {
-                        "body": "APIException",
+                        "body": "exception",
                         "description": "If the server encountered an exception while processing the request",
                         "responseBodyMockData": {
                             "mockDataType": "JSON",
@@ -217,7 +206,7 @@
                 },
                 "responses": {
                     "200": {
-                        "body": "APIResponse",
+                        "body": "response",
                         "description": "If the request is successful",
                         "responseBodyMockData": {
                             "mockDataType": "JSON",
@@ -225,7 +214,7 @@
                         }
                     },
                     "404": {
-                        "body": "APIException",
+                        "body": "exception",
                         "description": "If the record to be updated could not be found.",
                         "responseBodyMockData": {
                             "mockDataType": "JSON",
@@ -233,7 +222,7 @@
                         }
                     },
                     "500": {
-                        "body": "APIException",
+                        "body": "exception",
                         "description": "If the server encountered an exception while processing the request.",
                         "responseBodyMockData": {
                             "mockDataType": "JSON",
@@ -275,7 +264,7 @@
                 },
                 "responses": {
                     "200": {
-                        "body": "APIResponse",
+                        "body": "response",
                         "description": "If the inventory item level is updated successfully.",
                         "responseBodyMockData": {
                             "mockDataType": "JSON",
@@ -283,7 +272,7 @@
                         }
                     },
                     "400": {
-                        "body": "APIException",
+                        "body": "exception",
                         "description": "If the inventory levesl could not be updated due to quantity-on-hand being lower than quantity-available or the other being higher",
                         "responseBodyMockData": {
                             "mockDataType": "JSON",
@@ -291,7 +280,7 @@
                         }
                     },
                     "500": {
-                        "body": "APIException",
+                        "body": "exception",
                         "description": "If the server encountered an error while processing the request.",
                         "responseBodyMockData": {
                             "mockDataType": "JSON",
